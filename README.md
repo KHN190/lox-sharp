@@ -1,6 +1,6 @@
 ## What is this for?
 
-My personal goal is to implement a Lox VM in C# following this fantastic book [Crafting Interpreters](https://craftinginterpreters.com/). I have never managed to finish any compiler books, and internet resources are never satisfying. I have no idea how could our beloved Bob make the book so fun, but I promise you it is a book worth investing time.
+My personal goal is to implement a Lox interpreter in C# and later a VM in C++, following this fantastic book [Crafting Interpreters](https://craftinginterpreters.com/). I never managed to finish a compiler book before, but Bob's book is the best!
 
 ## How do I Run?
 
@@ -17,7 +17,7 @@ dotnet run
 
 ## License
 
-I don't know much about license, but I know MIT is good.
+Is MIT good enough?
 
 ```
 The MIT License

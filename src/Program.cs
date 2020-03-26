@@ -8,23 +8,33 @@ namespace lox
 	{
 		private static bool hadError = false;
 
-		// static void Main(string[] args)
-		// {
-		// 	if (args.Length > 1)
-		// 	{
-		// 		Console.WriteLine("Usage: lox [script]");
-		// 		Environment.Exit(64);
-		// 	}
-		// 	else if (args.Length == 1)
-		// 		RunFile(args[0]);
-		// 	else
-		// 		RunPrompt();
-		// }
+        static void Main(string[] args)
+        {
+            //if (args.Length > 1)
+            //{
+            //    Console.WriteLine("Usage: lox [script]");
+            //    Environment.Exit(64);
+            //}
+            //else if (args.Length == 1)
+            //    RunFile(args[0]);
+            //else
+            //    RunPrompt();
 
-		/**
+            Expr expression = new Expr.Binary(
+                new Expr.Unary(
+                    new Token(TokenType.MINUS, "-", null, 1),
+                    new Expr.Literal(123)),
+                new Token(TokenType.STAR, "*", null, 1),
+                new Expr.Grouping(
+                    new Expr.Literal(45.67)));
+
+            Console.WriteLine(new AstPrinter().Print(expression));
+        }
+
+        /**
 		* Run Script / Prompt
 		*/
-		static void RunFile(string script) 
+        static void RunFile(string script) 
 		{
 			string path = Path.GetFullPath(script);
 			Console.WriteLine("Load script from {0}", path);

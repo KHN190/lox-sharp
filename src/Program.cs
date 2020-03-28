@@ -20,13 +20,13 @@ namespace lox
             //else
             //    RunPrompt();
 
-            Expr expression = new Expr.Binary(
-                new Expr.Unary(
-                    new Token(TokenType.MINUS, "-", null, 1),
-                    new Expr.Literal(123)),
-                new Token(TokenType.STAR, "*", null, 1),
-                new Expr.Grouping(
-                    new Expr.Literal(45.67)));
+            string source = "- 123 * (45.67 + 8.9)";
+
+            Scanner scanner = new Scanner(source);
+            List<Token> tokens = scanner.ScanTokens();
+
+            Parser parser = new Parser(tokens);
+            Expr expression = parser.Expression();
 
             Console.WriteLine(new AstPrinter().Print(expression));
         }
@@ -77,7 +77,19 @@ namespace lox
 			Report(line, "", msg);
 		}
 
-		static void Report(int line, string where, string msg)
+        public static void Error(Token token, string message)
+        {
+            if (token.type == TokenType.EOF)
+            {
+                Report(token.line, " at end.", message);
+            }
+            else
+            {
+                Report(token.line, " at '" + token.lexeme + "'", message);
+            }
+        }
+
+        static void Report(int line, string where, string msg)
 		{
 			Console.Error.WriteLine("[line {0}] Error{1}: {2}", line, where, msg);
 			hadError = true;

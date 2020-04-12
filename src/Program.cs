@@ -6,29 +6,22 @@ namespace lox
 {
 	class Lox
 	{
-		private static bool hadError = false;
+		private static bool hadError;
+        private static bool hadRuntimeError;
+
+        private static readonly Interpreter interpreter = new Interpreter();
 
         static void Main(string[] args)
         {
-            //if (args.Length > 1)
-            //{
-            //    Console.WriteLine("Usage: lox [script]");
-            //    Environment.Exit(64);
-            //}
-            //else if (args.Length == 1)
-            //    RunFile(args[0]);
-            //else
-            //    RunPrompt();
-
-            string source = "- 123 * (45.67 + 8.9)";
-
-            Scanner scanner = new Scanner(source);
-            List<Token> tokens = scanner.ScanTokens();
-
-            Parser parser = new Parser(tokens);
-            Expr expression = parser.Expression();
-
-            Console.WriteLine(new AstPrinter().Print(expression));
+            if (args.Length > 1)
+            {
+                Console.WriteLine("Usage: lox [script]");
+                Environment.Exit(64);
+            }
+            else if (args.Length == 1)
+                RunFile(args[0]);
+            else
+                RunPrompt();
         }
 
         /**
@@ -43,11 +36,13 @@ namespace lox
 
 			if (hadError)
 				Environment.Exit(65);
-		}
+            if (hadRuntimeError)
+                Environment.Exit(70);
+        }
 
 		static void RunPrompt() 
 		{
-			string line = "";
+			string line;
 
 			Console.Write("> ");
 			while ((line = Console.ReadLine()) != null)
@@ -61,13 +56,20 @@ namespace lox
 
 		static void Run(string source)
 		{
+            // scan
 			Scanner scanner = new Scanner(source); 
 			List<Token> tokens = scanner.ScanTokens();
 
-			// For now, print tokens
-			foreach (Token tok in tokens)
-				Console.WriteLine(tok);
-		}
+            // parse
+            Parser parser = new Parser(tokens);
+            Expr expression = parser.Expression();
+
+            // print
+            //Console.WriteLine(new AstPrinter().Print(expression));
+
+            // interpret
+            interpreter.Interpret(expression);
+        }
 
 		/**
 		* Error Handler
@@ -87,6 +89,12 @@ namespace lox
             {
                 Report(token.line, " at '" + token.lexeme + "'", message);
             }
+        }
+
+        public static void RuntimeError(RuntimeError error)
+        {
+            Console.WriteLine(error.Message + "\n[line " + error.token.line + "]");
+            hadRuntimeError = true;
         }
 
         static void Report(int line, string where, string msg)

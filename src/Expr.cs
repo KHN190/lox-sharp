@@ -1,5 +1,3 @@
-using System;
-
 namespace lox
 {
 	public abstract class Expr
@@ -48,7 +46,7 @@ namespace lox
 
 		public class Literal : Expr
 		{
-			public Literal(Object value)
+			public Literal(object value)
 			{
 				this.value = value;
 			}
@@ -58,7 +56,7 @@ namespace lox
 				return visitor.VisitLiteralExpr<R>(this);
 			}
 
-			public readonly Object value;
+			public readonly object value;
 		}
 
 		public class Unary : Expr

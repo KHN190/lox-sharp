@@ -30,7 +30,6 @@ namespace lox
         static void RunFile(string script)
         {
             string path = Path.GetFullPath(script);
-            //Console.WriteLine("Load script from {0}", path);
 
             Run(File.ReadAllText(path));
 
@@ -45,6 +44,7 @@ namespace lox
             string line;
 
             Console.Write("> ");
+
             while ((line = Console.ReadLine()) != null)
             {
                 try
@@ -59,6 +59,7 @@ namespace lox
 
                 hadError = false;
             }
+            Console.WriteLine();
         }
 
         static void Run(string source)

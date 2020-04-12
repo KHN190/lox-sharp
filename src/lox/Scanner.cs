@@ -118,7 +118,7 @@ namespace lox
             // Non-terminated string
             if (IsAtEnd())
             {
-                Lox.Error(line, "Unterminated string.");
+                Lox.Error(line, "Non-terminated string.");
                 return;
             }
 

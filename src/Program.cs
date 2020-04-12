@@ -30,7 +30,7 @@ namespace lox
         static void RunFile(string script)
         {
             string path = Path.GetFullPath(script);
-            Console.WriteLine("Load script from {0}", path);
+            //Console.WriteLine("Load script from {0}", path);
 
             Run(File.ReadAllText(path));
 
@@ -47,7 +47,14 @@ namespace lox
             Console.Write("> ");
             while ((line = Console.ReadLine()) != null)
             {
-                Run(line);
+                try
+                {
+                    Run(line);
+                }
+                catch (SystemException)
+                {
+                    // stop execution, but no interruption in REPL
+                }
                 Console.Write("> ");
 
                 hadError = false;
@@ -62,13 +69,14 @@ namespace lox
 
             // parse
             Parser parser = new Parser(tokens);
-            Expr expression = parser.Expression();
+            List<Stmt> stmts = parser.Parse();
 
             // print
+            //Expr expression = parser.Expression();
             //Console.WriteLine(new AstPrinter().Print(expression));
 
             // interpret
-            interpreter.Interpret(expression);
+            interpreter.Interpret(stmts);
         }
 
         /**

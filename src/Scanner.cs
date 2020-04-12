@@ -92,7 +92,7 @@ namespace lox
                     break;
 
                 default:
-                    if (Char.IsDigit(c))
+                    if (char.IsDigit(c))
                         Number();
                     else if (IsLetter(c)) // lox specific, we don't believe in C#
                         Identifier();
@@ -115,7 +115,7 @@ namespace lox
                 Advance();
             }
 
-            // Unterminated string
+            // Non-terminated string
             if (IsAtEnd())
             {
                 Lox.Error(line, "Unterminated string.");
@@ -132,18 +132,18 @@ namespace lox
 
         private void Number()
         {
-            while (Char.IsDigit(Peek())) Advance();
+            while (char.IsDigit(Peek())) Advance();
 
             // Look for a fractional part.
-            if (Peek() == '.' && Char.IsDigit(PeekNext()))
+            if (Peek() == '.' && char.IsDigit(PeekNext()))
             {
                 // Consume the "."
                 Advance();
 
-                while (Char.IsDigit(Peek())) Advance();
+                while (char.IsDigit(Peek())) Advance();
             }
 
-            AddToken(NUMBER, Double.Parse(source.Substring(start, current - start)));
+            AddToken(NUMBER, double.Parse(source.Substring(start, current - start)));
         }
 
         private void Identifier()
@@ -214,12 +214,12 @@ namespace lox
 
         private static bool IsLetter(char c)
         {
-            return Char.IsLetter(c) || c == '_';
+            return char.IsLetter(c) || c == '_';
         }
 
         private static bool IsLetterOrDigit(char c)
         {
-            return IsLetter(c) || Char.IsDigit(c);
+            return IsLetter(c) || char.IsDigit(c);
         }
         #endregion
     }

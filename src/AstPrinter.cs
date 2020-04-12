@@ -40,5 +40,10 @@ namespace lox
         {
             return Parenthesize(expr.op.lexeme, expr.right);
         }
+
+        public string VisitVariableExpr<T>(Expr.Variable expr)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

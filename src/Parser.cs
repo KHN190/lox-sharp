@@ -7,25 +7,97 @@ namespace lox
 {
     public class Parser
     {
+        /* Parser generates
+         *  1. Binary / Unary expressions, also
+         *  2. Statements,
+         *  3. Finally a syntax tree.
+         */
+
         // Exception
         private class ParseError : SystemException { }
 
         // Attrs
         private readonly List<Token> tokens;
-        private int current = 0;
+        private int current;
 
         // Constructor
-
         public Parser(List<Token> tokens)
         {
             this.tokens = tokens;
         }
 
+        // program → declaration* EOF ;
+        public List<Stmt> Parse()
+        {
+            List<Stmt> statements = new List<Stmt>();
+            while (!IsAtEnd())
+            {
+                statements.Add(Declaration());
+            }
+            return statements;
+        }
 
 
-        #region Binary Operations
+        #region Statements
 
-        internal Expr Expression()
+        // statement → exprStmt | printStmt ;
+        private Stmt Statement()
+        {
+            if (Match(PRINT)) return PrintStatement();
+
+            return ExpressionStatement();
+        }
+
+        // declaration → varDecl | statement ;
+        private Stmt Declaration()
+        {
+            try
+            {
+                if (Match(VAR)) return VarDeclaration();
+                return Statement();
+            }
+            catch (ParseError)
+            {
+                Synchronize();
+                return null;
+            }
+        }
+
+        // varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+        private Stmt VarDeclaration()
+        {
+            Token name = Consume(IDENTIFIER, "Expect variable name.");
+            Expr initializer = null;
+
+            if (Match(EQUAL))
+            {
+                initializer = Expression();
+            }
+            Consume(SEMICOLON, "Expect ';' after variable declaration.");
+
+            return new Stmt.Var(name, initializer);
+        }
+
+        private Stmt PrintStatement()
+        {
+            Expr expr = Expression();
+            Consume(SEMICOLON, "Expect ';' after value.");
+            return new Stmt.Print(expr);
+        }
+
+        private Stmt ExpressionStatement()
+        {
+            Expr expr = Expression();
+            Consume(SEMICOLON, "Expect ';' after expression.");
+            return new Stmt.Expression(expr);
+        }
+        #endregion
+
+
+
+            #region Binary Expressions
+
+            internal Expr Expression()
         {
             return Equality();
         }
@@ -92,9 +164,9 @@ namespace lox
 
 
 
-        #region Unary Operations
+        #region Unary Expressions
 
-        // unary → ( "!" | "-" ) unary | primary ;
+        // unary → ( "!" | "-" | "+" ) unary | primary ;
         private Expr Unary()
         {
             if (Match(MINUS, BANG))
@@ -106,7 +178,7 @@ namespace lox
             return Primary();
         }
 
-        // primary → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" ;
+        // primary → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | identifier ;
         private Expr Primary()
         {
             if (Match(FALSE)) return new Expr.Literal(false);
@@ -116,6 +188,11 @@ namespace lox
             if (Match(NUMBER, STRING))
             {
                 return new Expr.Literal(Previous().literal);
+            }
+
+            if (Match(IDENTIFIER))
+            {
+                return new Expr.Variable(Previous());
             }
 
             // handle parenthesis
@@ -133,6 +210,9 @@ namespace lox
         }
         #endregion
 
+
+
+        #region Parser Utils
 
         // Consume
         private Token Consume(TokenType type, string message)
@@ -183,6 +263,11 @@ namespace lox
         {
             return Peek().type == EOF;
         }
+        #endregion
+
+
+
+        #region Parser Errors
 
         // Error Handler
 
@@ -217,5 +302,6 @@ namespace lox
             }
             Advance();
         }
+        #endregion
     }
 }

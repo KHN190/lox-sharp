@@ -1,9 +1,14 @@
 using System;
+using System.Collections.Generic;
 
 namespace lox
 {
-    public class Interpreter : Expr.Visitor<object>
+    public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
+        // variables by scope
+        private EnvironmentLox env = new EnvironmentLox();
+
+
         #region Evaluate
 
         internal void Interpret(Expr expr)
@@ -19,13 +24,71 @@ namespace lox
             }
         }
 
+        internal void Interpret(List<Stmt> statements)
+        {
+            try
+            {
+                foreach (Stmt stmt in statements)
+                {
+                    Execute(stmt);
+                }
+            }
+            catch (RuntimeError error)
+            {
+                Lox.RuntimeError(error);
+            }
+        }
+
+        // returns evaluated values (double, bool, etc.)
         private object Evaluate(Expr expr)
         {
             return expr.Accept(this);
         }
 
+        // returns null always
+        private object Execute(Stmt stmt)
+        {
+            return stmt.Accept(this);
+        }
+        #endregion
+
+
+
+        #region Statments
+
+        object Stmt.Visitor<object>.VisitExpressionStmt<T>(Stmt.Expression stmt)
+        {
+            Evaluate(stmt.expression);
+            return null;
+        }
+
+        object Stmt.Visitor<object>.VisitPrintStmt<T>(Stmt.Print stmt)
+        {
+            object value = Evaluate(stmt.expression);
+            Console.WriteLine(Stringify(value));
+            return null;
+        }
+
+        object Stmt.Visitor<object>.VisitVarStmt<T>(Stmt.Var stmt)
+        {
+            object value = null;
+
+            if (stmt.initializer != null)
+            {
+                value = Evaluate(stmt.initializer);
+            }
+            env.Define(stmt.name.lexeme, value);
+
+            return null;
+        }
+        #endregion
+
+
+
+        #region Expressions
+
         // Binary operations
-        public object VisitBinaryExpr<T>(Expr.Binary expr)
+        object Expr.Visitor<object>.VisitBinaryExpr<T>(Expr.Binary expr)
         {
             object right = Evaluate(expr.right);
 
@@ -91,19 +154,19 @@ namespace lox
         }
 
         // Brackets
-        public object VisitGroupingExpr<T>(Expr.Grouping expr)
+        object Expr.Visitor<object>.VisitGroupingExpr<T>(Expr.Grouping expr)
         {
             return Evaluate(expr.expression);
         }
 
         // Trivial literal value
-        public object VisitLiteralExpr<T>(Expr.Literal expr)
+        object Expr.Visitor<object>.VisitLiteralExpr<T>(Expr.Literal expr)
         {
             return expr.value;
         }
 
         // Unary operations
-        public object VisitUnaryExpr<T>(Expr.Unary expr)
+        object Expr.Visitor<object>.VisitUnaryExpr<T>(Expr.Unary expr)
         {
             object right = expr.right;
 
@@ -123,6 +186,12 @@ namespace lox
             }
             // unreachable
             return null;
+        }
+
+        // Var operations
+        object Expr.Visitor<object>.VisitVariableExpr<T>(Expr.Variable expr)
+        {
+            return env.Get(expr.name);
         }
         #endregion
 
@@ -151,6 +220,7 @@ namespace lox
             return value.ToString();
         }
         #endregion
+
 
 
         #region Runtime Errors

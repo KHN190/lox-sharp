@@ -2,11 +2,11 @@ using System;
 
 namespace lox
 {
-	public class AstPrinter : Expr.Visitor<string>
-	{
-		internal string Print(Expr expr)
-		{
-			return expr.Accept(this);
+    public class AstPrinter : Expr.Visitor<string>
+    {
+        internal string Print(Expr expr)
+        {
+            return expr.Accept(this);
         }
 
         string Parenthesize(string name, params Expr[] exprs)
@@ -14,7 +14,7 @@ namespace lox
             string text = "(" + name;
             foreach (Expr expr in exprs)
             {
-                text += " "  + expr.Accept(this);
+                text += " " + expr.Accept(this);
             }
             text += ")";
             return text;

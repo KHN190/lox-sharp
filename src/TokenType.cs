@@ -1,6 +1,7 @@
 namespace lox
 {
-    public enum TokenType {
+    public enum TokenType
+    {
         // Single-character tokens.
         LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
         COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
@@ -18,6 +19,6 @@ namespace lox
         AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
         PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
-        EOF    
+        EOF
     }
 }

@@ -1,6 +1,6 @@
 using System;
 
-namespace lox 
+namespace lox
 {
     public class Interpreter : Expr.Visitor<object>
     {

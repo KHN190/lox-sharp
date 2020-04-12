@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace lox
 {
-	class Lox
-	{
-		private static bool hadError;
+    class Lox
+    {
+        private static bool hadError;
         private static bool hadRuntimeError;
 
         private static readonly Interpreter interpreter = new Interpreter();
@@ -27,38 +27,38 @@ namespace lox
         /**
 		* Run Script / Prompt
 		*/
-        static void RunFile(string script) 
-		{
-			string path = Path.GetFullPath(script);
-			Console.WriteLine("Load script from {0}", path);
+        static void RunFile(string script)
+        {
+            string path = Path.GetFullPath(script);
+            Console.WriteLine("Load script from {0}", path);
 
-			Run(File.ReadAllText(path));
+            Run(File.ReadAllText(path));
 
-			if (hadError)
-				Environment.Exit(65);
+            if (hadError)
+                Environment.Exit(65);
             if (hadRuntimeError)
                 Environment.Exit(70);
         }
 
-		static void RunPrompt() 
-		{
-			string line;
+        static void RunPrompt()
+        {
+            string line;
 
-			Console.Write("> ");
-			while ((line = Console.ReadLine()) != null)
-			{
-				Run(line);
-				Console.Write("> ");
+            Console.Write("> ");
+            while ((line = Console.ReadLine()) != null)
+            {
+                Run(line);
+                Console.Write("> ");
 
-				hadError = false;
-			}
-		}
+                hadError = false;
+            }
+        }
 
-		static void Run(string source)
-		{
+        static void Run(string source)
+        {
             // scan
-			Scanner scanner = new Scanner(source); 
-			List<Token> tokens = scanner.ScanTokens();
+            Scanner scanner = new Scanner(source);
+            List<Token> tokens = scanner.ScanTokens();
 
             // parse
             Parser parser = new Parser(tokens);
@@ -71,13 +71,13 @@ namespace lox
             interpreter.Interpret(expression);
         }
 
-		/**
+        /**
 		* Error Handler
 		*/
-		public static void Error(int line, string msg)
-		{
-			Report(line, "", msg);
-		}
+        public static void Error(int line, string msg)
+        {
+            Report(line, "", msg);
+        }
 
         public static void Error(Token token, string message)
         {
@@ -98,9 +98,9 @@ namespace lox
         }
 
         static void Report(int line, string where, string msg)
-		{
-			Console.Error.WriteLine("[line {0}] Error{1}: {2}", line, where, msg);
-			hadError = true;
-		}
-	}
+        {
+            Console.Error.WriteLine("[line {0}] Error{1}: {2}", line, where, msg);
+            hadError = true;
+        }
+    }
 }

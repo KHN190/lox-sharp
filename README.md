@@ -18,7 +18,7 @@ dotnet run
 
 ## License
 
-Is MIT good enough?
+I know MIT is good so I use it.
 
 ```
 The MIT License

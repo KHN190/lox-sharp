@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace lox
 {
-    public class EnvironmentLox
+    public class EnvLox
     {
         /* The class stores variables by scope */
 

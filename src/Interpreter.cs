@@ -6,7 +6,7 @@ namespace lox
     public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
         // variables by scope
-        private EnvironmentLox env = new EnvironmentLox();
+        private readonly EnvLox env = new EnvLox();
 
 
         #region Evaluate

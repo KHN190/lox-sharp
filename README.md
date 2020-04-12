@@ -14,6 +14,7 @@ dotnet run
 ## Devlog
 
 * 2019.12.25 Christmas day, release lox scanner.
+* 2020.4.12 release lox interpreter for expressions.
 
 ## License
 

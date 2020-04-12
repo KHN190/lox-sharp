@@ -6,11 +6,29 @@ namespace lox
 	{
 		internal interface Visitor<R>
 		{
+			R VisitAssignExpr<T>(Assign expr);
 			R VisitBinaryExpr<T>(Binary expr);
 			R VisitGroupingExpr<T>(Grouping expr);
 			R VisitLiteralExpr<T>(Literal expr);
 			R VisitUnaryExpr<T>(Unary expr);
 			R VisitVariableExpr<T>(Variable expr);
+		}
+
+		public class Assign : Expr
+		{
+			public Assign(Token name, Expr value)
+			{
+				this.name = name;
+				this.value = value;
+			}
+
+			internal override R Accept<R>(Visitor<R> visitor)
+			{
+				return visitor.VisitAssignExpr<R>(this);
+			}
+
+			public readonly Token name;
+			public readonly Expr value;
 		}
 
 		public class Binary : Expr

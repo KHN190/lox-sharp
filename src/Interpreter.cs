@@ -193,6 +193,14 @@ namespace lox
         {
             return env.Get(expr.name);
         }
+
+        object Expr.Visitor<object>.VisitAssignExpr<T>(Expr.Assign expr)
+        {
+            object value = Evaluate(expr.value);
+            env.Assign(expr.name, value);
+
+            return value;
+        }
         #endregion
 
 

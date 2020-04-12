@@ -45,5 +45,10 @@ namespace lox
         {
             throw new NotImplementedException();
         }
+
+        public string VisitAssignExpr<T>(Expr.Assign expr)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

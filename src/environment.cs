@@ -10,7 +10,18 @@ namespace lox
 
         internal void Define(string name, object value)
         {
-            values.Add(name, value);
+            values[name] = value;
+        }
+
+        internal void Assign(Token name, object value)
+        {
+            if (values.ContainsKey(name.lexeme))
+            {
+                values[name.lexeme] = value;
+                return;
+            }
+
+            throw new RuntimeError(name, "[line " + name.line + "] Undefined variable: " + name.lexeme + ".");
         }
 
         internal object Get(Token name)

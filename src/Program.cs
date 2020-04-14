@@ -53,7 +53,8 @@ namespace lox
                 }
                 catch (SystemException)
                 {
-                    // stop execution, but no interruption in REPL
+                    // stop execution,
+                    // but no interruption in REPL
                 }
                 Console.Write("> ");
 

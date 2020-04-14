@@ -142,7 +142,7 @@ namespace lox
                     return (double)left <= (double)right;
 
                 // a == b
-                case TokenType.EQUAL:
+                case TokenType.EQUAL_EQUAL:
                     return IsEqual(left, right);
 
                 // a != b
@@ -194,12 +194,14 @@ namespace lox
             return env.Get(expr.name);
         }
 
+        // Assign value
         object Expr.Visitor<object>.VisitAssignExpr<T>(Expr.Assign expr)
         {
             object value = Evaluate(expr.value);
             env.Assign(expr.name, value);
 
-            return value;
+            // prevent `if (a = 0)` evaluating to a value
+            return null;
         }
         #endregion
 

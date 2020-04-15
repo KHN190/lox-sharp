@@ -1,0 +1,13 @@
+for (var x = 1; x < 5; x = x + 1)
+{
+	print x;
+}
+
+print "-----";
+
+var c = 0;
+for (; c < 5; )
+{
+	print c;
+	c = c + 1;
+}

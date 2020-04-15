@@ -41,10 +41,14 @@ namespace lox
 
         #region Statements
 
-        // statement → exprStmt | printStmt ;
+        // statement → exprStmt | ifStmt | printStmt | whileStmt | forStmt | block ;
         private Stmt Statement()
         {
+            if (Match(IF)) return IfStatement();
             if (Match(PRINT)) return PrintStatement();
+            if (Match(WHILE)) return WhileStatement();
+            if (Match(FOR)) return ForStatement();
+            if (Match(LEFT_BRACE)) return new Stmt.Block(Block());
 
             return ExpressionStatement();
         }
@@ -79,6 +83,7 @@ namespace lox
             return new Stmt.Var(name, initializer);
         }
 
+        // printStmt → "print" expression ";" ;
         private Stmt PrintStatement()
         {
             Expr expr = Expression();
@@ -86,11 +91,115 @@ namespace lox
             return new Stmt.Print(expr);
         }
 
+        // exprStmt → expression ";" ;
         private Stmt ExpressionStatement()
         {
             Expr expr = Expression();
             Consume(SEMICOLON, "Expect ';' after expression.");
             return new Stmt.Expression(expr);
+        }
+
+        // block → "{" declaration* "}" ;
+        private List<Stmt> Block()
+        {
+            List<Stmt> stmts = new List<Stmt>();
+
+            while (!Check(RIGHT_BRACE) && !IsAtEnd())
+            {
+                stmts.Add(Declaration());
+            }
+            Consume(RIGHT_BRACE, "Expect '}' after block.");
+
+            return stmts;
+        }
+
+        // whileStmt → "while" "(" expression ")" statement ;
+        private Stmt WhileStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'while'.");
+            Expr condition = Expression();
+            Consume(RIGHT_PAREN, "Expect ')' after while condition.");
+
+            Stmt body = Statement();
+
+            return new Stmt.While(condition, body);
+        }
+
+        // ifStmt → "if" "(" expression ")" statement ( "else" statement )? ;
+        private Stmt IfStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'if'.");
+            Expr condition = Expression();
+            Consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+            Stmt thenBranch = Statement();
+            Stmt elseBranch = null;
+            if (Match(ELSE))
+            {
+                elseBranch = Statement();
+            }
+
+            return new Stmt.If(condition, thenBranch, elseBranch);
+        }
+
+        // forStmt → "for" "(" ( varDecl | exprStmt | ";" )
+        //                      expression? ";"
+        //                      expression? ")" statement ;
+
+        private Stmt ForStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+            // first part
+            Stmt initializer = null;
+            if (Match(SEMICOLON))
+            {
+                initializer = null;
+            }
+            else if (Match(VAR))
+            {
+                initializer = VarDeclaration();
+            }
+            else
+            {
+                initializer = ExpressionStatement();
+            }
+
+            // second part
+            Expr condition = null;
+            if (!Check(SEMICOLON))
+            {
+                condition = Expression();
+            }
+            Consume(SEMICOLON, "Expect ';' after loop condition.");
+
+            // third part
+            Expr increment = null;
+            if (!Check(RIGHT_PAREN))
+            {
+                increment = Expression();
+            }
+            Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+
+            // body for clauses
+            Stmt body = Statement();
+
+            if (increment != null)
+            {
+                body = new Stmt.Block(
+                    new List<Stmt> { body, new Stmt.Expression(increment) });
+            }
+
+            if (condition == null) condition = new Expr.Literal(true);
+            body = new Stmt.While(condition, body);
+
+            if (initializer != null)
+            {
+                body = new Stmt.Block(
+                    new List<Stmt> { initializer, body });
+            }
+
+            return body;
         }
         #endregion
 
@@ -104,10 +213,10 @@ namespace lox
             return Assignment();
         }
 
-        // assignment → IDENTIFIER "=" assignment | equality ;
+        // assignment → IDENTIFIER "=" assignment | equality | logic_or ;
         private Expr Assignment()
         {
-            Expr expr = Equality();
+            Expr expr = Or();
 
             if (Match(EQUAL))
             {
@@ -121,9 +230,37 @@ namespace lox
                 }
                 Error(equals, "Invalid assignment target.");
             }
+
             return expr;
         }
 
+        // logic_or → logic_and ( "or" logic_and )* ;
+        private Expr Or()
+        {
+            Expr expr = And();
+
+            while (Match(OR))
+            {
+                Token op = Previous();
+                Expr right = And();
+                expr = new Expr.Logical(expr, op, right);
+            }
+            return expr;
+        }
+
+        // logic_and → equality ( "and" equality )* ;
+        private Expr And()
+        {
+            Expr expr = Equality();
+
+            while (Match(AND))
+            {
+                Token op = Previous();
+                Expr right = Equality();
+                expr = new Expr.Logical(expr, op, right);
+            }
+            return expr;
+        }
 
         // equality → comparison ( ( "!=" | "==" ) comparison )* ;
         private Expr Equality()

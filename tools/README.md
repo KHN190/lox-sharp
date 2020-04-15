@@ -2,7 +2,7 @@
 
 ```bash
 # generate Expr.cs using the template
-dotnet run ../src
+dotnet run ../src/lox
 ```
 
 # Or...Compile

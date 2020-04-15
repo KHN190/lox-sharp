@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace lox
 {
@@ -10,6 +11,7 @@ namespace lox
 			R VisitBinaryExpr<T>(Binary expr);
 			R VisitGroupingExpr<T>(Grouping expr);
 			R VisitLiteralExpr<T>(Literal expr);
+			R VisitLogicalExpr<T>(Logical expr);
 			R VisitUnaryExpr<T>(Unary expr);
 			R VisitVariableExpr<T>(Variable expr);
 		}
@@ -78,6 +80,25 @@ namespace lox
 			}
 
 			public readonly Object value;
+		}
+
+		public class Logical : Expr
+		{
+			public Logical(Expr left, Token op, Expr right)
+			{
+				this.left = left;
+				this.op = op;
+				this.right = right;
+			}
+
+			internal override R Accept<R>(Visitor<R> visitor)
+			{
+				return visitor.VisitLogicalExpr<R>(this);
+			}
+
+			public readonly Expr left;
+			public readonly Token op;
+			public readonly Expr right;
 		}
 
 		public class Unary : Expr

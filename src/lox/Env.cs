@@ -8,6 +8,22 @@ namespace lox
 
         private readonly Dictionary<string, object> values = new Dictionary<string, object>();
 
+        private readonly EnvLox enclosing;
+
+        public EnvLox()
+        {
+            enclosing = null;
+        }
+
+        public EnvLox(EnvLox enclosing)
+        {
+            this.enclosing = enclosing;
+        }
+
+
+
+        #region Methods
+
         internal void Define(string name, object value)
         {
             values[name] = value;
@@ -21,6 +37,13 @@ namespace lox
                 return;
             }
 
+            // if the variable isn’t in this environment, it checks the outer one
+            if (enclosing != null)
+            {
+                enclosing.Assign(name, value);
+                return;
+            }
+
             throw new RuntimeError(name, "[line " + name.line + "] Undefined variable: " + name.lexeme + ".");
         }
 
@@ -28,7 +51,11 @@ namespace lox
         {
             if (values.ContainsKey(name.lexeme)) return values[name.lexeme];
 
+            // If the variable isn’t found in this scope, we simply try the enclosing one
+            if (enclosing != null) return enclosing.Get(name);
+
             throw new RuntimeError(name, "[line " + name.line + "] Undefined variable: " + name.lexeme + ".");
         }
+        #endregion
     }
 }

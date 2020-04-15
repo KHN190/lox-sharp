@@ -5,8 +5,8 @@ namespace lox
 {
     public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
-        // variables by scope
-        private readonly EnvLox env = new EnvLox();
+        // store variables by scope
+        private EnvLox env = new EnvLox();
 
 
         #region Evaluate
@@ -50,6 +50,25 @@ namespace lox
         {
             return stmt.Accept(this);
         }
+
+        private object ExecuteBlock(List<Stmt> stmts, EnvLox newEnv)
+        {
+            EnvLox previous = this.env;
+            try
+            {
+                this.env = newEnv;
+
+                foreach (Stmt stmt in stmts)
+                {
+                    Execute(stmt);
+                }
+            }
+            finally
+            {
+                this.env = previous;
+            }
+            return null;
+        }
         #endregion
 
 
@@ -79,6 +98,34 @@ namespace lox
             }
             env.Define(stmt.name.lexeme, value);
 
+            return null;
+        }
+
+        object Stmt.Visitor<object>.VisitBlockStmt<T>(Stmt.Block stmt)
+        {
+            ExecuteBlock(stmt.statements, new EnvLox(env));
+            return null;
+        }
+
+        object Stmt.Visitor<object>.VisitIfStmt<T>(Stmt.If stmt)
+        {
+            if (IsTruthy(Evaluate(stmt.condition)))
+            {
+                Execute(stmt.thenBranch);
+            }
+            else if (stmt.elseBranch != null)
+            {
+                Execute(stmt.elseBranch);
+            }
+            return null;
+        }
+
+        object Stmt.Visitor<object>.VisitWhileStmt<T>(Stmt.While stmt)
+        {
+            while (IsTruthy(Evaluate(stmt.condition)))
+            {
+                Execute(stmt.body);
+            }
             return null;
         }
         #endregion
@@ -202,6 +249,25 @@ namespace lox
 
             // prevent `if (a = 0)` evaluating to a value
             return null;
+        }
+
+        // And & Or
+        object Expr.Visitor<object>.VisitLogicalExpr<T>(Expr.Logical expr)
+        {
+            object left = Evaluate(expr.left);
+
+            switch (expr.op.type)
+            {
+                case TokenType.OR:
+                    if (IsTruthy(left)) return left;
+                    break;
+                case TokenType.AND:
+                    if (!IsTruthy(left)) return left;
+                    break;
+            }
+
+            // Doesn't evaluate to here unless necessary
+            return Evaluate(expr.right);
         }
         #endregion
 

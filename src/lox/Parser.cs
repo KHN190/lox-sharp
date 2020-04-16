@@ -150,8 +150,12 @@ namespace lox
         {
             Consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
+            Stmt initializer;
+            Expr condition = null;
+            Expr increment = null;
+            Stmt body = Statement();
+
             // first part
-            Stmt initializer = null;
             if (Match(SEMICOLON))
             {
                 initializer = null;
@@ -166,7 +170,6 @@ namespace lox
             }
 
             // second part
-            Expr condition = null;
             if (!Check(SEMICOLON))
             {
                 condition = Expression();
@@ -174,7 +177,6 @@ namespace lox
             Consume(SEMICOLON, "Expect ';' after loop condition.");
 
             // third part
-            Expr increment = null;
             if (!Check(RIGHT_PAREN))
             {
                 increment = Expression();
@@ -182,8 +184,6 @@ namespace lox
             Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
             // body for clauses
-            Stmt body = Statement();
-
             if (increment != null)
             {
                 body = new Stmt.Block(

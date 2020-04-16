@@ -24,9 +24,15 @@ namespace lox
 
         #region Methods
 
-        internal void Define(string name, object value)
+        internal void Define(Token name, object value)
         {
-            values[name] = value;
+            if (!values.ContainsKey(name.lexeme))
+            {
+                values[name.lexeme] = value;
+                return;
+            }
+
+            throw new RuntimeError(name, "[line " + name.line + "] variable is already defined.");
         }
 
         internal void Assign(Token name, object value)

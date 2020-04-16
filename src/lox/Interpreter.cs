@@ -96,7 +96,7 @@ namespace lox
             {
                 value = Evaluate(stmt.initializer);
             }
-            env.Define(stmt.name.lexeme, value);
+            env.Define(stmt.name, value);
 
             return null;
         }

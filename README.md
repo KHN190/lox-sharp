@@ -1,6 +1,6 @@
 ## What is this for?
 
-My personal goal is to implement a Lox interpreter in C# and later a VM in C++ (sorry but I have changed my mind a bit after finding out [Rust](https://www.rust-lang.org)...), following this fantastic book [Crafting Interpreters](https://craftinginterpreters.com/). I never managed to finish a compiler book before, but Bob's book is the best!
+My personal goal is to implement a Lox interpreter in C# and later a VM in C++ (I may also want to do it in [Rust](https://www.rust-lang.org)...), following the fantastic book [Crafting Interpreters](https://craftinginterpreters.com/). I never managed to finish a compiler book, but Bob's book is the best!
 
 ## How do I Run?
 
@@ -19,6 +19,12 @@ dotnet run ./scripts/hello.lox
 * 2020.4.12 Expressions.
 * 2020.4.16 Control flows.
 * 2020.5.14 Functions.
+
+## Want to do
+
+* anonymous function
+* exception handling
+* add more native functions
 
 ## License
 

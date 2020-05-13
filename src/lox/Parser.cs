@@ -41,11 +41,12 @@ namespace lox
 
         #region Statements
 
-        // statement → exprStmt | ifStmt | printStmt | whileStmt | forStmt | block ;
+        // statement → exprStmt | ifStmt | printStmt | returnStmt | whileStmt | forStmt | block ;
         private Stmt Statement()
         {
             if (Match(IF)) return IfStatement();
             if (Match(PRINT)) return PrintStatement();
+            if (Match(RETURN)) return ReturnStatement();
             if (Match(WHILE)) return WhileStatement();
             if (Match(FOR)) return ForStatement();
             if (Match(LEFT_BRACE)) return new Stmt.Block(Block());
@@ -53,11 +54,12 @@ namespace lox
             return ExpressionStatement();
         }
 
-        // declaration → varDecl | statement ;
+        // declaration → funDecl | varDecl | statement ;
         private Stmt Declaration()
         {
             try
             {
+                if (Match(FUN)) return FunDeclaration("function");
                 if (Match(VAR)) return VarDeclaration();
                 return Statement();
             }
@@ -66,6 +68,40 @@ namespace lox
                 Synchronize();
                 return null;
             }
+        }
+
+        // funDecl → "fun" function ;
+        // function → IDENTIFIER "(" parameters? ")" block ;
+        // parameters → IDENTIFIER ( "," IDENTIFIER )* ;
+        private Stmt FunDeclaration(string kind)
+        {
+            Token name = Consume(IDENTIFIER, "Expect " + kind + " name.");
+
+            Consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+            List<Token> parameters = new List<Token>();
+
+            // parse params
+            if (!Check(RIGHT_PAREN))
+            {
+                do
+                {
+                    if (parameters.Count >= 255)
+                    {
+                        Error(Peek(), "Cannot have more than 255 parameters.");
+                    }
+                    parameters.Add(Consume(IDENTIFIER, "Expect parameter name."));
+                }
+                while (Match(COMMA));
+            }
+            Consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+            // parse body
+            Consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+
+            List<Stmt> body = Block();
+
+            return new Stmt.Function(name, parameters, body);
         }
 
         // varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -89,6 +125,21 @@ namespace lox
             Expr expr = Expression();
             Consume(SEMICOLON, "Expect ';' after value.");
             return new Stmt.Print(expr);
+        }
+
+        // returnStmt → "return" expression? ";" ;
+        private Stmt ReturnStatement()
+        {
+            Token keyword = Previous();
+            Expr value = null;
+
+            if (!Check(SEMICOLON))
+            {
+                value = Expression();
+            }
+            Consume(SEMICOLON, "Expect ';' after return value.");
+
+            return new Stmt.Return(keyword, value);
         }
 
         // exprStmt → expression ";" ;
@@ -326,7 +377,7 @@ namespace lox
 
         #region Unary Expressions
 
-        // unary → ( "!" | "-" | "+" ) unary | primary ;
+        // unary → ( "!" | "-" | "+" ) unary | call ;
         private Expr Unary()
         {
             if (Match(MINUS, BANG))
@@ -335,7 +386,49 @@ namespace lox
                 Expr right = Unary();
                 return new Expr.Unary(op, right);
             }
-            return Primary();
+            return Call();
+        }
+
+        // call → primary ( "(" arguments? ")" )* ;
+        private Expr Call()
+        {
+            Expr expr = Primary();
+
+            while (true)
+            {
+                if (Match(LEFT_PAREN))
+                {
+                    expr = FinishCall(expr);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return expr;
+        }
+
+        private Expr FinishCall(Expr callee)
+        {
+            List<Expr> arguments = new List<Expr>();
+
+            // 0 or more arguments
+            if (!Check(RIGHT_PAREN))
+            {
+                // arguments → expression ( "," expression )* ;
+                do
+                {
+                    if (arguments.Count >= 255)
+                    {
+                        Error(Peek(), "Cannot have more than 255 arguments.");
+                    }
+                    arguments.Add(Expression());
+                }
+                while (Match(COMMA));
+            }
+            Token paren = Consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+            return new Expr.Call(callee, paren, arguments);
         }
 
         // primary → NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")" | identifier ;

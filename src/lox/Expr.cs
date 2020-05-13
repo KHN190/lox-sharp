@@ -9,6 +9,7 @@ namespace lox
 		{
 			R VisitAssignExpr<T>(Assign expr);
 			R VisitBinaryExpr<T>(Binary expr);
+			R VisitCallExpr<T>(Call expr);
 			R VisitGroupingExpr<T>(Grouping expr);
 			R VisitLiteralExpr<T>(Literal expr);
 			R VisitLogicalExpr<T>(Logical expr);
@@ -50,6 +51,25 @@ namespace lox
 			public readonly Expr left;
 			public readonly Token op;
 			public readonly Expr right;
+		}
+
+		public class Call : Expr
+		{
+			public Call(Expr callee, Token paren, List<Expr> arguments)
+			{
+				this.callee = callee;
+				this.paren = paren;
+				this.arguments = arguments;
+			}
+
+			internal override R Accept<R>(Visitor<R> visitor)
+			{
+				return visitor.VisitCallExpr<R>(this);
+			}
+
+			public readonly Expr callee;
+			public readonly Token paren;
+			public readonly List<Expr> arguments;
 		}
 
 		public class Grouping : Expr

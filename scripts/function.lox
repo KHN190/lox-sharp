@@ -1,0 +1,16 @@
+fun count(n) 
+{
+  if (n > 1) count(n - 1);
+  print n;
+}
+
+print count;
+
+// native function `clock`
+var start = clock();
+
+count(5);
+
+var end = clock();
+
+print "using time: " + (end - start) + " s.";

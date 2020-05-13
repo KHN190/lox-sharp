@@ -6,7 +6,20 @@ namespace lox
     public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
         // store variables by scope
-        private EnvLox env = new EnvLox();
+        internal static readonly EnvLox globals = new EnvLox();
+
+        internal EnvLox env = new EnvLox(globals);
+
+
+
+        #region Native Functions
+
+        public Interpreter()
+        {
+            globals.Define("clock", new Clock());
+        }
+        #endregion
+
 
 
         #region Evaluate
@@ -40,18 +53,18 @@ namespace lox
         }
 
         // returns evaluated values (double, bool, etc.)
-        private object Evaluate(Expr expr)
+        internal object Evaluate(Expr expr)
         {
             return expr.Accept(this);
         }
 
         // returns null always
-        private object Execute(Stmt stmt)
+        internal object Execute(Stmt stmt)
         {
             return stmt.Accept(this);
         }
 
-        private object ExecuteBlock(List<Stmt> stmts, EnvLox newEnv)
+        internal object ExecuteBlock(List<Stmt> stmts, EnvLox newEnv)
         {
             EnvLox previous = this.env;
             try
@@ -88,6 +101,14 @@ namespace lox
             return null;
         }
 
+        object Stmt.Visitor<object>.VisitReturnStmt<T>(Stmt.Return stmt)
+        {
+            object value = null;
+            if (stmt.value != null) value = Evaluate(stmt.value);
+
+            throw new Return(value);
+        }
+
         object Stmt.Visitor<object>.VisitVarStmt<T>(Stmt.Var stmt)
         {
             object value = null;
@@ -101,10 +122,18 @@ namespace lox
             return null;
         }
 
+        object Stmt.Visitor<object>.VisitFunctionStmt<T>(Stmt.Function stmt)
+        {
+            LoxFunction function = new LoxFunction(stmt, env);
+
+            env.Define(stmt.name, function);
+
+            return function;
+        }
+
         object Stmt.Visitor<object>.VisitBlockStmt<T>(Stmt.Block stmt)
         {
-            ExecuteBlock(stmt.statements, new EnvLox(env));
-            return null;
+            return ExecuteBlock(stmt.statements, new EnvLox(env));
         }
 
         object Stmt.Visitor<object>.VisitIfStmt<T>(Stmt.If stmt)
@@ -153,10 +182,12 @@ namespace lox
                     if (left is double && right is double)
                         return (double)left + (double)right;
 
-                    if (left is string && right is string)
-                        return (string)left + (string)right;
+                    if ((left is string && right is string) ||
+                        (left is string && right is double) ||
+                        (left is double && right is string))
+                        return left.ToString() + right.ToString();
 
-                    throw new RuntimeError(expr.op, "Operands must both be numbers or strings.");
+                    throw new RuntimeError(expr.op, "Can only apply '+' to numbers or strings.");
 
                 // a * b
                 case TokenType.STAR:
@@ -233,6 +264,36 @@ namespace lox
             }
             // unreachable
             return null;
+        }
+
+        // Function expressions
+        object Expr.Visitor<object>.VisitCallExpr<T>(Expr.Call expr)
+        {
+            object callee = Evaluate(expr.callee);
+            
+            List<object> arguments = new List<object>();
+
+            foreach (Expr argument in expr.arguments)
+            {
+                arguments.Add(Evaluate(argument));
+            }
+
+            // Check if really callable
+            if (!(callee is ILoxCallable))
+            {
+                throw new RuntimeError(expr.paren, "Can only call function and class.");
+            }
+            ILoxCallable function = (ILoxCallable) callee;
+
+            // Check number of arguments match expectation
+            if (arguments.Count != function.Arity())
+            {
+                throw new RuntimeError(expr.paren,
+                    "Expect number of arguments: " + function.Arity() +
+                    ", but got: " + arguments.Count);
+            }
+
+            return function.Call(this, arguments);
         }
 
         // Var operations

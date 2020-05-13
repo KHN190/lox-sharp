@@ -55,5 +55,10 @@ namespace lox
         {
             throw new NotImplementedException();
         }
+
+        public string VisitCallExpr<T>(Expr.Call expr)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -24,15 +24,36 @@ namespace lox
 
         #region Methods
 
+        internal void Define(string name, object value)
+        {
+            // used for native function definitions
+            // probably need to allow override of native funcs
+            //  e.g.
+            //   fun clock() { return "hello!"; }
+            //
+            // but you can't do it now.
+
+            if (!values.ContainsKey(name))
+            {
+                values[name] = value;
+                return;
+            }
+            Token token = new Token(TokenType.STRING, name, null, 0);
+
+            throw new RuntimeError(token, "is already defined.");
+        }
+
         internal void Define(Token name, object value)
         {
+            // define functions and variables
+
             if (!values.ContainsKey(name.lexeme))
             {
                 values[name.lexeme] = value;
                 return;
             }
 
-            throw new RuntimeError(name, "[line " + name.line + "] variable is already defined.");
+            throw new RuntimeError(name, "[line " + name.line + "] is already defined.");
         }
 
         internal void Assign(Token name, object value)

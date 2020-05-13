@@ -204,7 +204,6 @@ namespace lox
             Stmt initializer;
             Expr condition = null;
             Expr increment = null;
-            Stmt body = Statement();
 
             // first part
             if (Match(SEMICOLON))
@@ -235,6 +234,8 @@ namespace lox
             Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
             // body for clauses
+            Stmt body = Statement();
+
             if (increment != null)
             {
                 body = new Stmt.Block(

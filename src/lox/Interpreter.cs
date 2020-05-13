@@ -6,9 +6,9 @@ namespace lox
     public class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
         // store variables by scope
-        internal static readonly EnvLox globals = new EnvLox();
+        private static readonly EnvLox globals = new EnvLox();
 
-        internal EnvLox env = new EnvLox(globals);
+        private EnvLox env = new EnvLox(globals);
 
 
 

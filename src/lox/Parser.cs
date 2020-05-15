@@ -70,6 +70,20 @@ namespace lox
             }
         }
 
+        private Stmt NonVarDeclaration()
+        {
+            try
+            {
+                if (Match(FUN)) return FunDeclaration("function");
+                return Statement();
+            }
+            catch (ParseError)
+            {
+                Synchronize();
+                return null;
+            }
+        }
+
         // funDecl → "fun" function ;
         // function → IDENTIFIER? "(" parameters? ")" block ;
         //      parameters → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -124,17 +138,7 @@ namespace lox
             Token name = Consume(IDENTIFIER, "Expect variable name.");
             Stmt initializer = null;
 
-            if (Match(EQUAL)) initializer = Declaration();
-
-            //if (initializer is Expr)
-            //{
-            //    Consume(SEMICOLON, "Expect ';' after variable declaration.");
-            //    return new Stmt.Var(name, (Expr)initializer);
-            //}
-            //if (initializer is Stmt.Expression exprStmt)
-            //{
-            //    return new Stmt.Var(name, exprStmt.expression);
-            //}
+            if (Match(EQUAL)) initializer = NonVarDeclaration();
 
             return new Stmt.Var(name, initializer);
         }

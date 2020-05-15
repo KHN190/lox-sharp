@@ -58,7 +58,7 @@ namespace lox
             return expr.Accept(this);
         }
 
-        // returns null always
+        // returns evaluated values (expr, or last statement value of a block)
         internal object Execute(Stmt stmt)
         {
             return stmt.Accept(this);

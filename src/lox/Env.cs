@@ -38,7 +38,7 @@ namespace lox
                 values[name] = value;
                 return;
             }
-            Token token = new Token(TokenType.STRING, name, null, 0);
+            Token token = new Token(TokenType.IDENTIFIER, name, null, 0);
 
             throw new RuntimeError(token, "is already defined.");
         }

@@ -14,3 +14,9 @@ count(5);
 var end = clock();
 
 print "using time: " + (end - start) + " s.";
+
+var f = fun(n) { return n + 1; }
+
+print f;
+
+print f(1); // 2

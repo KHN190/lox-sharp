@@ -71,11 +71,25 @@ namespace lox
         }
 
         // funDecl → "fun" function ;
-        // function → IDENTIFIER "(" parameters? ")" block ;
-        // parameters → IDENTIFIER ( "," IDENTIFIER )* ;
+        // function → IDENTIFIER? "(" parameters? ")" block ;
+        //      parameters → IDENTIFIER ( "," IDENTIFIER )* ;
+
         private Stmt FunDeclaration(string kind)
         {
-            Token name = Consume(IDENTIFIER, "Expect " + kind + " name.");
+            Token name;
+
+            // anonymous function
+            if (Check(LEFT_PAREN))
+            {
+                int line = Peek().line;
+
+                name = new Token(IDENTIFIER, "#lambda_" + line + "_" + current, null, line);
+            }
+            // normal function
+            else
+            {
+                name = Consume(IDENTIFIER, "Expect " + kind + " name.");
+            }
 
             Consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
 
@@ -104,17 +118,23 @@ namespace lox
             return new Stmt.Function(name, parameters, body);
         }
 
-        // varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+        // varDecl → "var" IDENTIFIER ( "=" declaration )? ";" ;
         private Stmt VarDeclaration()
         {
             Token name = Consume(IDENTIFIER, "Expect variable name.");
-            Expr initializer = null;
+            Stmt initializer = null;
 
-            if (Match(EQUAL))
-            {
-                initializer = Expression();
-            }
-            Consume(SEMICOLON, "Expect ';' after variable declaration.");
+            if (Match(EQUAL)) initializer = Declaration();
+
+            //if (initializer is Expr)
+            //{
+            //    Consume(SEMICOLON, "Expect ';' after variable declaration.");
+            //    return new Stmt.Var(name, (Expr)initializer);
+            //}
+            //if (initializer is Stmt.Expression exprStmt)
+            //{
+            //    return new Stmt.Var(name, exprStmt.expression);
+            //}
 
             return new Stmt.Var(name, initializer);
         }
@@ -268,6 +288,7 @@ namespace lox
         // assignment → IDENTIFIER "=" assignment | equality | logic_or ;
         private Expr Assignment()
         {
+            // variable assignment
             Expr expr = Or();
 
             if (Match(EQUAL))

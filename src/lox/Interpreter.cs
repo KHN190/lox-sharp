@@ -67,20 +67,22 @@ namespace lox
         internal object ExecuteBlock(List<Stmt> stmts, EnvLox newEnv)
         {
             EnvLox previous = this.env;
+
+            object value = null;
             try
             {
                 this.env = newEnv;
 
                 foreach (Stmt stmt in stmts)
                 {
-                    Execute(stmt);
+                    value = Execute(stmt);
                 }
             }
             finally
             {
                 this.env = previous;
             }
-            return null;
+            return value;
         }
         #endregion
 
@@ -90,8 +92,8 @@ namespace lox
 
         object Stmt.Visitor<object>.VisitExpressionStmt<T>(Stmt.Expression stmt)
         {
-            Evaluate(stmt.expression);
-            return null;
+            object value = Evaluate(stmt.expression);
+            return value;
         }
 
         object Stmt.Visitor<object>.VisitPrintStmt<T>(Stmt.Print stmt)
@@ -115,7 +117,7 @@ namespace lox
 
             if (stmt.initializer != null)
             {
-                value = Evaluate(stmt.initializer);
+                value = Execute(stmt.initializer);
             }
             env.Define(stmt.name, value);
 
@@ -185,7 +187,7 @@ namespace lox
                     if ((left is string && right is string) ||
                         (left is string && right is double) ||
                         (left is double && right is string))
-                        return left.ToString() + right.ToString();
+                        return "" + left + right;
 
                     throw new RuntimeError(expr.op, "Can only apply '+' to numbers or strings.");
 

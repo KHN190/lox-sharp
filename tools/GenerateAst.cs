@@ -33,7 +33,7 @@ namespace lox.tools
                 "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
                 "Print      : Expr expression",
                 "Return     : Token keyword, Expr value",
-                "Var        : Token name, Expr initializer",
+                "Var        : Token name, Stmt initializer",
                 "While      : Expr condition, Stmt body"
             });
         }

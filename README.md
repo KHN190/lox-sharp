@@ -19,12 +19,12 @@ dotnet run ./scripts/hello.lox
 * 2020.4.12 Expressions.
 * 2020.4.16 Control flows.
 * 2020.5.14 Functions.
+* 2020.5.16 Anonymous functions & Can assign var using statements.
 
 ## Want to do
 
-* anonymous function
-* exception handling
-* add more native functions
+* exception handling.
+* more native functions.
 
 ## License
 

@@ -119,7 +119,7 @@ namespace lox
 
 		public class Var : Stmt
 		{
-			public Var(Token name, Expr initializer)
+			public Var(Token name, Stmt initializer)
 			{
 				this.name = name;
 				this.initializer = initializer;
@@ -131,7 +131,7 @@ namespace lox
 			}
 
 			public readonly Token name;
-			public readonly Expr initializer;
+			public readonly Stmt initializer;
 		}
 
 		public class While : Stmt

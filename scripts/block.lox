@@ -18,9 +18,16 @@ print a;
 print b;
 print c;
 
-var a = 1;
+var d = 1;
 {
-  var a = a + 2;
-  print a; // 3
+  var d = d + 2;
+  print d; // 3
 }
-print a; // 1
+print d; // 1
+
+var e = 
+{
+  // do sth
+  1;
+}
+print e; // 1

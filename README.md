@@ -23,6 +23,7 @@ dotnet run ./scripts/hello.lox
 
 ## Want to do
 
+* re-assign varible to statements.
 * exception handling.
 * more native functions.
 
